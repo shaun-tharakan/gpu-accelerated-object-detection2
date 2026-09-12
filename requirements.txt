@@ -6,3 +6,4 @@ opencv-python
 matplotlib
 pandas
 gradio
+numpy
