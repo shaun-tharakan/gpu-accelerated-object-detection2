@@ -6,25 +6,25 @@ import cv2
 import gradio as gr
 import torch
 
-try:
-    from src.detection import detect_frame
-except ImportError:
-    def detect_frame(frame, device="cpu"):
-        h, w, _ = frame.shape
-        cv2.rectangle(frame, (int(w*0.2), int(h*0.2)), (int(w*0.8), int(h*0.8)), (0, 255, 0), 2)
-        cv2.putText(frame, f"Mock Detection ({device.upper()})", (int(w*0.2), int(h*0.2)-10),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-        return frame, [{"class_name": "mock_object", "confidence": 0.99}]
-
+# Correctly import your YOLODetector
+from src.detection import YOLODetector
 from src.benchmark import run_batch_benchmark, save_results_to_csv
 from src.visualization import generate_benchmark_charts
+
+# Initialize the detector once so it doesn't reload the model on every click
+detector = YOLODetector(model_name="yolov8n.pt")
 
 def process_single_image(input_image, device):
     if input_image is None:
         return None, "No image uploaded.", "0.0 FPS"
 
     start_time = time.perf_counter()
-    output_image, detections = detect_frame(input_image, device=device)
+    
+    # 1. Run detection
+    detections = detector.detect_frame(input_image, device=device)
+    
+    # 2. Draw the real bounding boxes
+    output_image = detector.annotate_frame(input_image, detections)
     
     if torch.cuda.is_available() and device == "cuda":
         torch.cuda.synchronize()
