@@ -1,9 +1,9 @@
 device,model,batch_size,image_size,warmup_count,measured_count,avg_latency_ms,throughput_fps,gpu_memory_mb
-cpu,yolov8n.pt,1,640x640,5,50,54.33,18.41,0.0
-cpu,yolov8n.pt,4,640x640,5,50,177.02,22.6,0.0
-cpu,yolov8n.pt,8,640x640,5,50,342.62,23.35,0.0
-cpu,yolov8n.pt,16,640x640,5,50,667.91,23.96,0.0
-cuda,yolov8n.pt,1,640x640,5,50,14.61,68.43,46.4
-cuda,yolov8n.pt,4,640x640,5,50,22.72,176.09,114.8
-cuda,yolov8n.pt,8,640x640,5,50,30.73,260.37,198.71
-cuda,yolov8n.pt,16,640x640,5,50,66.82,239.46,361.28
+cpu,yolov8n.pt,1,640x640,5,50,60.45,16.54,0.0
+cpu,yolov8n.pt,4,640x640,5,50,187.63,21.32,0.0
+cpu,yolov8n.pt,8,640x640,5,50,343.54,23.29,0.0
+cpu,yolov8n.pt,16,640x640,5,50,668.95,23.92,0.0
+cuda,yolov8n.pt,1,640x640,5,50,15.98,62.57,46.4
+cuda,yolov8n.pt,4,640x640,5,50,22.34,179.04,114.8
+cuda,yolov8n.pt,8,640x640,5,50,30.97,258.31,198.71
+cuda,yolov8n.pt,16,640x640,5,50,61.87,258.59,361.28
