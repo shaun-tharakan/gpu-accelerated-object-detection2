@@ -4,20 +4,16 @@ import cv2
 import numpy as np
 import pandas as pd
 
-# Add root folder to sys.path so imports work smoothly
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.detection import YOLODetector
 from src.inference import run_inference
 from src.gpu_utils import get_peak_gpu_memory_mb, reset_gpu_memory
 
+
 def run_batch_benchmark(image_path, batch_size=1, device="cpu", warmup_iters=5, measure_iters=50, model_name="yolov8n.pt"):
-    """
-    Runs a controlled batch-image benchmark.
-    """
     img = cv2.imread(image_path)
     
-    # Auto-generate a valid synthetic image if the file cannot be loaded or is corrupted
     if img is None:
         print(f"Generating valid sample image at: {image_path}")
         img = np.random.randint(0, 256, (640, 640, 3), dtype=np.uint8)
@@ -25,7 +21,6 @@ def run_batch_benchmark(image_path, batch_size=1, device="cpu", warmup_iters=5, 
 
     image_size = f"{img.shape[1]}x{img.shape[0]}"
     
-    # Create batch list
     batch_input = [img for _ in range(batch_size)]
     
     print(f"\n--- Benchmarking {model_name} on {device.upper()} (Batch Size: {batch_size}) ---")
@@ -34,12 +29,10 @@ def run_batch_benchmark(image_path, batch_size=1, device="cpu", warmup_iters=5, 
     if device == "cuda":
         reset_gpu_memory()
 
-    # Warm-up Iterations
     print(f"Performing {warmup_iters} warm-up iterations...")
     for _ in range(warmup_iters):
         _ = run_inference(detector, batch_input, device=device)
         
-    # Measured Iterations
     print(f"Performing {measure_iters} measured iterations...")
     total_latency_ms = 0.0
     
@@ -67,15 +60,15 @@ def run_batch_benchmark(image_path, batch_size=1, device="cpu", warmup_iters=5, 
     
     return record
 
+
 def save_results_to_csv(results, output_path="results/raw/benchmark_results.csv"):
-    """Saves benchmark results to CSV for visualization."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     df = pd.DataFrame(results)
     df.to_csv(output_path, index=False)
     print(f"\nSuccess! Benchmark results saved to {output_path}")
 
+
 if __name__ == "__main__":
-    # Ensure test.jpg points to root directory
     test_image_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "test.jpg"))
     all_results = []
     

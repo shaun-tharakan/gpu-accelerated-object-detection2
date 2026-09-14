@@ -6,7 +6,6 @@ import cv2
 import gradio as gr
 import torch
 
-# Import Partner A & B's shared tools
 try:
     from src.detection import detect_frame
 except ImportError:
@@ -17,11 +16,9 @@ except ImportError:
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         return frame, [{"class_name": "mock_object", "confidence": 0.99}]
 
-# Import your benchmarking and visualization functions
 from src.benchmark import run_batch_benchmark, save_results_to_csv
 from src.visualization import generate_benchmark_charts
 
-# --- TAB 1: Single Image Inference ---
 def process_single_image(input_image, device):
     if input_image is None:
         return None, "No image uploaded.", "0.0 FPS"
@@ -32,7 +29,7 @@ def process_single_image(input_image, device):
     if torch.cuda.is_available() and device == "cuda":
         torch.cuda.synchronize()
         
-    elapsed_time = (time.perf_counter() - start_time) * 1000  # ms
+    elapsed_time = (time.perf_counter() - start_time) * 1000
     fps = 1000.0 / elapsed_time if elapsed_time > 0 else 0.0
 
     metrics_text = f"**Device:** {device.upper()}\n\n**Latency:** {elapsed_time:.2f} ms\n\n**Objects Detected:** {len(detections)}"
@@ -40,32 +37,27 @@ def process_single_image(input_image, device):
 
     return output_image, metrics_text, fps_text
 
-# --- TAB 2: Batch Benchmarking directly in UI ---
 def run_ui_benchmark(image_path):
     if image_path is None:
         return "Please upload an image.", None
     
     all_results = []
     batch_sizes = [1, 4, 8, 16]
-    # Only run CUDA if it's actually available on the machine running the UI
     devices = ["cpu", "cuda"] if torch.cuda.is_available() else ["cpu"]
     
     for device in devices:
         for b_size in batch_sizes:
             try:
-                # Using fewer measure_iters here so the UI doesn't freeze for too long
                 res = run_batch_benchmark(image_path, batch_size=b_size, device=device, warmup_iters=2, measure_iters=10)
                 all_results.append(res)
             except Exception as e:
                 print(f"Skipping {device} batch {b_size}: {e}")
 
     if all_results:
-        # Save results and generate the graphs
         csv_path = "results/raw/ui_benchmark_results.csv"
         save_results_to_csv(all_results, csv_path)
         generate_benchmark_charts(csv_path=csv_path, output_dir="results/figures")
         
-        # Load the generated images to display in the Gradio Gallery
         chart_images = [
             "results/figures/latency_vs_batch.png",
             "results/figures/throughput_vs_batch.png",
@@ -80,8 +72,6 @@ def run_ui_benchmark(image_path):
     
     return "❌ Benchmark failed.", None
 
-# --- UI Design & Layout ---
-# Using a clean, modern theme with custom colors
 custom_theme = gr.themes.Soft(
     primary_hue="emerald",
     secondary_hue="indigo",
@@ -98,7 +88,6 @@ with gr.Blocks(title="GPU Object Detection", theme=custom_theme) as demo:
 
     with gr.Tabs():
         
-        # TAB 1
         with gr.TabItem("🎯 Live Detection"):
             with gr.Row():
                 with gr.Column(scale=1):
@@ -118,7 +107,6 @@ with gr.Blocks(title="GPU Object Detection", theme=custom_theme) as demo:
                 outputs=[output_img, metrics_box, fps_box]
             )
 
-        # TAB 2
         with gr.TabItem("📊 Hardware Benchmarking"):
             gr.Markdown("Upload an image to simulate a video stream and measure latency, throughput, and VRAM across different batch sizes.")
             with gr.Row():
@@ -128,7 +116,6 @@ with gr.Blocks(title="GPU Object Detection", theme=custom_theme) as demo:
                     status_text = gr.Textbox(label="Status", interactive=False)
                 
                 with gr.Column(scale=2):
-                    # A gallery component to display all 4 charts side-by-side
                     gallery = gr.Gallery(label="Performance Charts", show_label=True, columns=2, object_fit="contain")
                     
             bench_btn.click(
