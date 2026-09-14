@@ -1,7 +1,6 @@
 import torch
 
 def check_device_availability():
-    """Returns CUDA availability and hardware details."""
     cuda_available = torch.cuda.is_available()
     device_name = torch.cuda.get_device_name(0) if cuda_available else "CPU Only"
     return {
@@ -11,13 +10,11 @@ def check_device_availability():
     }
 
 def reset_gpu_memory():
-    """Clears GPU cache to isolate benchmark measurements."""
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.reset_peak_memory_stats()
 
 def get_peak_gpu_memory_mb():
-    """Returns peak allocated GPU VRAM in megabytes."""
     if torch.cuda.is_available():
         peak_bytes = torch.cuda.max_memory_allocated()
         return round(peak_bytes / (1024 * 1024), 2)

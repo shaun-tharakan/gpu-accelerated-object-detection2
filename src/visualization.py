@@ -3,7 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def generate_benchmark_charts(csv_path="results/raw/benchmark_results.csv", output_dir="results/figures"):
-    """Plots Latency, Throughput, Speedup, and VRAM charts from CSV results."""
     if not os.path.exists(csv_path):
         print(f"Error: Path '{csv_path}' not found. Run benchmarks first.")
         return
@@ -14,7 +13,6 @@ def generate_benchmark_charts(csv_path="results/raw/benchmark_results.csv", outp
     cpu_df = df[df["device"] == "cpu"].sort_values("batch_size")
     cuda_df = df[df["device"] == "cuda"].sort_values("batch_size")
 
-    # 1. Latency vs Batch Size
     plt.figure(figsize=(8, 5))
     if not cpu_df.empty:
         plt.plot(cpu_df["batch_size"], cpu_df["avg_latency_ms"], marker='o', label="CPU")
@@ -28,7 +26,6 @@ def generate_benchmark_charts(csv_path="results/raw/benchmark_results.csv", outp
     plt.savefig(os.path.join(output_dir, "latency_vs_batch.png"))
     plt.close()
 
-    # 2. Throughput vs Batch Size
     plt.figure(figsize=(8, 5))
     if not cpu_df.empty:
         plt.plot(cpu_df["batch_size"], cpu_df["throughput_fps"], marker='o', label="CPU")
@@ -42,7 +39,6 @@ def generate_benchmark_charts(csv_path="results/raw/benchmark_results.csv", outp
     plt.savefig(os.path.join(output_dir, "throughput_vs_batch.png"))
     plt.close()
 
-    # 3. Speedup Multiplier
     if not cpu_df.empty and not cuda_df.empty:
         merged = pd.merge(cpu_df, cuda_df, on="batch_size", suffixes=('_cpu', '_cuda'))
         merged["speedup"] = merged["avg_latency_ms_cpu"] / merged["avg_latency_ms_cuda"]
@@ -57,7 +53,6 @@ def generate_benchmark_charts(csv_path="results/raw/benchmark_results.csv", outp
         plt.savefig(os.path.join(output_dir, "gpu_speedup.png"))
         plt.close()
 
-    # 4. GPU VRAM Usage
     if not cuda_df.empty and "gpu_memory_mb" in cuda_df.columns:
         plt.figure(figsize=(8, 5))
         plt.plot(cuda_df["batch_size"], cuda_df["gpu_memory_mb"], marker='d', color='purple', label="VRAM Allocation")
