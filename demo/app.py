@@ -6,12 +6,10 @@ import cv2
 import gradio as gr
 import torch
 
-# Correctly import your YOLODetector
 from src.detection import YOLODetector
 from src.benchmark import run_batch_benchmark, save_results_to_csv
 from src.visualization import generate_benchmark_charts
 
-# Initialize the detector once so it doesn't reload the model on every click
 detector = YOLODetector(model_name="yolov8n.pt")
 
 def process_single_image(input_image, device):
@@ -20,10 +18,8 @@ def process_single_image(input_image, device):
 
     start_time = time.perf_counter()
     
-    # 1. Run detection
     detections = detector.detect_frame(input_image, device=device)
     
-    # 2. Draw the real bounding boxes
     output_image = detector.annotate_frame(input_image, detections)
     
     if torch.cuda.is_available() and device == "cuda":
